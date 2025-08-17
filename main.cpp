@@ -30,7 +30,17 @@ bool findTaxi(int &availableTaxis) {
     }
 }
 
+void assignPassenger() {
+    cout << "Passenger assigned\n";
+}
 
+void taxiRide(int &availableTaxis) {
+    cout << "Taxi ride started\n";
+    availableTaxis--;
+    cout << "Databases updated\n";
+    cout << "Taxi ride completed\n";
+    availableTaxis++;
+}
 
 int main() {
     int minutesToPickup = 35;
