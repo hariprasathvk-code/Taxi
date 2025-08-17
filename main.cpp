@@ -1,10 +1,13 @@
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <chrono>
 using namespace std;
 
-void incomingOrder() {
+void incomingOrder(int orderId, string customerName) {
     cout << "Incoming order\n";
+    ofstream f("incoming_orders.csv", ios::app);
+    f << orderId << "," << customerName << "\n";
 }
 
 bool pickupTime(int &minutesToPickup) {
@@ -19,38 +22,58 @@ bool pickupTime(int &minutesToPickup) {
     }
 }
 
-bool findTaxi(int &availableTaxis) {
-    if (availableTaxis > 0) {
+bool findTaxi() {
+    ifstream f("available_taxis.csv");
+    string line;
+    if (getline(f, line)) {
         cout << "Taxi found\n";
+        f.close();
+        ifstream in("available_taxis.csv");
+        ofstream t("temp.csv");
+        bool removed = false;
+        while (getline(in, line)) {
+            if (!removed && !line.empty()) { removed = true; continue; }
+            if (!line.empty()) t << line << "\n";
+        }
+        in.close(); t.close();
+        remove("available_taxis.csv");
+        rename("temp.csv", "available_taxis.csv");
         return true;
-    } else {
-        cout << "No taxi, waiting\n";
-        this_thread::sleep_for(chrono::seconds(1));
-        return false;
     }
+    cout << "No taxi, waiting\n";
+    this_thread::sleep_for(chrono::seconds(1));
+    return false;
 }
 
-void assignPassenger() {
+void assignPassenger(int orderId, string customerName) {
     cout << "Passenger assigned\n";
+    ofstream h("order_history.csv", ios::app);
+    h << orderId << "," << customerName << ",Assigned\n";
 }
 
-void taxiRide(int &availableTaxis) {
+void taxiRide(int orderId, string customerName) {
     cout << "Taxi ride started\n";
-    availableTaxis--;
-    cout << "Databases updated\n";
+    this_thread::sleep_for(chrono::seconds(1));
+    ofstream h("order_history.csv", ios::app);
+    h << orderId << "," << customerName << ",Completed\n";
+    ofstream f("available_taxis.csv", ios::app);
+    f << "Taxi_Free\n";
     cout << "Taxi ride completed\n";
-    availableTaxis++;
 }
 
 int main() {
     int minutesToPickup = 35;
-    int availableTaxis = 1;
+    int orderId = 1;
+    string customerName;
 
-    incomingOrder();
+    cout << "Enter customer name: ";
+    getline(cin, customerName);
+
+    incomingOrder(orderId, customerName);
     while (!pickupTime(minutesToPickup));
-    while (!findTaxi(availableTaxis));
-    assignPassenger();
-    taxiRide(availableTaxis);
+    while (!findTaxi());
+    assignPassenger(orderId, customerName);
+    taxiRide(orderId, customerName);
 
     return 0;
 }
