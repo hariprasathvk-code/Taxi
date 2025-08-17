@@ -19,6 +19,18 @@ bool pickupTime(int &minutesToPickup) {
     }
 }
 
+bool findTaxi(int &availableTaxis) {
+    if (availableTaxis > 0) {
+        cout << "Taxi found\n";
+        return true;
+    } else {
+        cout << "No taxi, waiting\n";
+        this_thread::sleep_for(chrono::seconds(1));
+        return false;
+    }
+}
+
+
 
 int main() {
     int minutesToPickup = 35;
