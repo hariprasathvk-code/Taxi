@@ -4,10 +4,10 @@
 #include <chrono>
 using namespace std;
 
-void incomingOrder(int orderId, string customerName) {
-    cout << "Incoming order\n";
+void incomingOrder(int orderId, string customerName, string bookingMethod) {
+    cout << "Incoming order (" << bookingMethod << ")\n";
     ofstream f("incoming_orders.csv", ios::app);
-    f << orderId << "," << customerName << "\n";
+    f << orderId << "," << customerName << "," << bookingMethod << "\n";
 }
 
 bool pickupTime(int &minutesToPickup) {
@@ -64,12 +64,20 @@ void taxiRide(int orderId, string customerName) {
 int main() {
     int minutesToPickup = 35;
     int orderId = 1;
-    string customerName;
+    string customerName, bookingMethod;
 
     cout << "Enter customer name: ";
     getline(cin, customerName);
 
-    incomingOrder(orderId, customerName);
+    int choice;
+    cout << "Booking method? (1 - Phone, 2 - Online): ";
+    cin >> choice;
+    cin.ignore(); // flush newline
+
+    if (choice == 1) bookingMethod = "Phone";
+    else bookingMethod = "Online";
+
+    incomingOrder(orderId, customerName, bookingMethod);
     while (!pickupTime(minutesToPickup));
     while (!findTaxi());
     assignPassenger(orderId, customerName);
